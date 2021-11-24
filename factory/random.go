@@ -4,7 +4,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
 	"math/rand"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func randomStringFromSet(s ...string) string {
 	n := len(s)
