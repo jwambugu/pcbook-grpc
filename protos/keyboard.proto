@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pcbook;
+option go_package = "./pb";
+
+// Keyboard is the type of keyboard used by a PC.
+message Keyboard{
+  enum Layout {
+    UNKNOWN = 0;
+    QWERTY = 1;
+    QWERTZ = 2;
+    AZERTY = 3;
+  }
+
+  // Layout is the keyboard layout.
+  Layout layout = 1;
+  bool is_backlit = 2;
+}

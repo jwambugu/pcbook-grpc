@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package pcbook;
+option go_package = "./pb";
+
+// Screen represents a screen of the PC.
+message Screen {
+  // Resolution is the resolution of the screen.
+  message Resolution {
+    // Width of the screen.
+    int32 width = 1;
+    // Height of the screen.
+    int32 height = 2;
+  }
+
+  enum Panel {
+    UNKNOWN = 0;
+    IPS = 1;
+    OLED = 2;
+  }
+
+  float size_inches = 1;
+  Resolution resolution = 2;
+  Panel panel = 3;
+  bool is_multi_touch = 4;
+}

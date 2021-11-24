@@ -1,7 +1,9 @@
 syntax = "proto3";
-package processor;
 
-option go_package = ".";
+package pcbook;
+option go_package = "./pb";
+
+import "memory.proto";
 
 // CPU is a processor that is used in a pc.
 message CPU {
@@ -17,4 +19,19 @@ message CPU {
   double minimum_frequency = 5;
   // The maximum frequency of the CPU.
   double maximum_frequency = 6;
+}
+
+// GPU is a graphic processing unit used on the pc.
+message GPU {
+  // The brand of the GPU.
+  string brand = 1;
+  // The name of the GPU.
+  string name = 2;
+  // The minimum frequency of the GPU.
+  double minimum_frequency = 3;
+  // The maximum frequency of the GPU.
+  double maximum_frequency = 4;
+
+  // The memory size of the GPU.
+  Memory memory = 5;
 }
