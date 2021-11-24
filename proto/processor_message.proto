@@ -1,0 +1,20 @@
+syntax = "proto3";
+package processor;
+
+option go_package = ".";
+
+// CPU is a processor that is used in a pc.
+message CPU {
+  // The brand of the CPU.
+  string brand = 1;
+  // The name of the CPU.
+  string name = 2;
+  // The number of cores in the CPU.
+  uint32 number_of_cores = 3;
+  // The number of threads in the CPU.
+  uint32 number_of_threads = 4;
+  // The minimum frequency of the CPU.
+  double minimum_frequency = 5;
+  // The maximum frequency of the CPU.
+  double maximum_frequency = 6;
+}
