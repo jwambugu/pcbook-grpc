@@ -8,9 +8,9 @@ message Screen {
   // Resolution is the resolution of the screen.
   message Resolution {
     // Width of the screen.
-    int32 width = 1;
+    uint32 width = 1;
     // Height of the screen.
-    int32 height = 2;
+    uint32 height = 2;
   }
 
   enum Panel {
