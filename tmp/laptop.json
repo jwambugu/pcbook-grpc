@@ -1,0 +1,62 @@
+{
+  "id": "088e1fc5-d808-462a-96b4-6dcd6e438b0c",
+  "brand": "Lenovo",
+  "name": "Thinkpad X1",
+  "cpu": {
+    "brand": "Intel",
+    "name": "Core i9-9980HK",
+    "number_of_cores": 4,
+    "number_of_threads": 11,
+    "minimum_frequency": 2.942475461740291,
+    "maximum_frequency": 3.4416894689661506
+  },
+  "ram": {
+    "value": "46",
+    "unit": "GIGABYTE"
+  },
+  "gpus": [
+    {
+      "brand": "NVIDIA",
+      "name": "RX 590",
+      "minimum_frequency": 1.3826031889444927,
+      "maximum_frequency": 1.7619210006988688,
+      "memory": {
+        "value": "4",
+        "unit": "GIGABYTE"
+      }
+    }
+  ],
+  "storages": [
+    {
+      "driver": "SSD",
+      "memory": {
+        "value": "688",
+        "unit": "GIGABYTE"
+      }
+    },
+    {
+      "driver": "HDD",
+      "memory": {
+        "value": "4",
+        "unit": "TERABYTE"
+      }
+    }
+  ],
+  "screen": {
+    "size_inches": 13.306969,
+    "resolution": {
+      "width": 6464,
+      "height": 3636
+    },
+    "panel": "OLED",
+    "is_multi_touch": false
+  },
+  "keyboard": {
+    "layout": "QWERTY",
+    "is_backlit": true
+  },
+  "weight_kg": 2.425150662579487,
+  "price_usd": 2128.099975908426,
+  "release_year": 2017,
+  "updated_at": "2021-11-24T20:16:40.371473Z"
+}
