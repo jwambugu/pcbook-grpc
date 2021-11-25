@@ -1,7 +1,10 @@
 syntax = "proto3";
 
 package pcbook;
+
 option go_package = "./pb";
+option java_package = "com.github.jwambugu.pcbook.pb";
+option java_multiple_files = true;
 
 import "processor.proto";
 import "memory.proto";
