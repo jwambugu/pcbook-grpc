@@ -1,8 +1,10 @@
 syntax = "proto3";
 
 package pcbook;
-option go_package = "./pb";
 
+option go_package = "./pb";
+option java_package = "com.github.jwambugu.pcbook.pb";
+option java_multiple_files = true;
 // Memory is the total capacity of the computer's memory.
 message Memory {
   enum Unit {
