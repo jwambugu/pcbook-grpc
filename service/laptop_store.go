@@ -18,6 +18,9 @@ type LaptopStore interface {
 	Save(laptop *pb.Laptop) error
 	// Find finds a laptop by its id
 	Find(id string) (*pb.Laptop, error)
+
+	// Search finds laptops by their properties using a filter, returns one by one laptop via the found function
+	Search(filter *pb.Filter, found func(laptop *pb.Laptop) error) error
 }
 
 // InMemoryLaptopStore is an in-memory implementation of a LaptopStore
@@ -33,6 +36,58 @@ func NewInMemoryLaptopStore() *InMemoryLaptopStore {
 	}
 }
 
+// matchesFilter returns true if the laptop matches the filter
+func matchesFilter(filter *pb.Filter, laptop *pb.Laptop) bool {
+	if laptop.GetPriceUsd() > filter.GetMaxPriceUsd() {
+		return false
+	}
+
+	if laptop.GetCpu().GetNumberOfCores() < filter.GetMinCpuCores() {
+		return false
+	}
+
+	if laptop.GetCpu().GetMaximumFrequency() < filter.GetMinCpuFrequency() {
+		return false
+	}
+
+	if toBits(laptop.GetRam()) < toBits(filter.GetMinRam()) {
+		return false
+	}
+
+	return true
+}
+
+// toBits converts memory unit to bits
+func toBits(memory *pb.Memory) uint64 {
+	value := memory.GetValue()
+
+	switch memory.GetUnit() {
+	case pb.Memory_BIT:
+		return value
+	case pb.Memory_BYTE:
+		return value << 3 // 8 = 2^3
+	case pb.Memory_KILOBYTE:
+		return value << 13 // 1024 * 8 = 2^10 * 2^3
+	case pb.Memory_MEGABYTE:
+		return value << 23 // 1024 * 1024 * 8 = 2^10 * 2^10 * 2^3
+	case pb.Memory_GIGABYTE:
+		return value << 33 // 1024 * 1024 * 1024 * 8 = 2^10 * 2^10 * 2^10 * 2^3
+	case pb.Memory_TERABYTE:
+		return value << 43 // 1024 * 1024 * 1024 * 1024 * 8 = 2^10 * 2^10 * 2^10 * 2^10 * 2^3
+	default:
+		return 0
+	}
+}
+
+func deepCopy(laptop *pb.Laptop) (*pb.Laptop, error) {
+	l := &pb.Laptop{}
+
+	if err := copier.Copy(l, laptop); err != nil {
+		return nil, fmt.Errorf("error copying laptop: %v", err)
+	}
+	return l, nil
+}
+
 // Save saves a laptop in the store
 func (store *InMemoryLaptopStore) Save(laptop *pb.Laptop) error {
 	store.mutext.Lock()
@@ -42,9 +97,9 @@ func (store *InMemoryLaptopStore) Save(laptop *pb.Laptop) error {
 		return ErrRecordExists
 	}
 
-	newLaptop := &pb.Laptop{}
-	if err := copier.Copy(newLaptop, laptop); err != nil {
-		return fmt.Errorf("error copying laptop: %v", err)
+	newLaptop, err := deepCopy(laptop)
+	if err != nil {
+		return err
 	}
 
 	store.data[laptop.Id] = newLaptop
@@ -61,10 +116,26 @@ func (store *InMemoryLaptopStore) Find(id string) (*pb.Laptop, error) {
 		return nil, nil
 	}
 
-	foundLaptop := &pb.Laptop{}
-	if err := copier.Copy(foundLaptop, laptop); err != nil {
-		return nil, fmt.Errorf("error copying laptop: %v", err)
+	return deepCopy(laptop)
+}
+
+// Search finds laptops by their properties using a filter, returns one by one laptop via the found function
+func (store *InMemoryLaptopStore) Search(filter *pb.Filter, match func(laptop *pb.Laptop) error) error {
+	store.mutext.RLock()
+	defer store.mutext.RUnlock()
+
+	for _, laptop := range store.data {
+		if matchesFilter(filter, laptop) {
+			foundLaptop, err := deepCopy(laptop)
+			if err != nil {
+				return err
+			}
+
+			if err := match(foundLaptop); err != nil {
+				return err
+			}
+		}
 	}
 
-	return foundLaptop, nil
+	return nil
 }

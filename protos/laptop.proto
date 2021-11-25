@@ -35,6 +35,14 @@ message Laptop {
   google.protobuf.Timestamp updated_at = 14;
 }
 
+// Filter represents a filter for a laptop with the specified specs
+message Filter {
+  double max_price_usd = 1;
+  uint32 min_cpu_cores = 2;
+  double min_cpu_frequency = 3;
+  Memory min_ram = 4;
+}
+
 // CreateLaptopRequest is the request message for the CreateLaptop RPC
 message CreateLaptopRequest {
   Laptop laptop = 1;
@@ -45,7 +53,18 @@ message CreateLaptopResponse {
   string id = 1;
 }
 
+// SearchLaptopRequest represents the request message for the SearchLaptop RPC
+message SearchLaptopRequest {
+  Filter filter = 1;
+}
+
+// SearchLaptopResponse represents the response message for the SearchLaptop RPC
+message SearchLaptopResponse {
+  Laptop laptop = 1;
+}
+
 // LaptopService is the interface for the Laptop service
 service LaptopService {
   rpc CreateLaptop(CreateLaptopRequest) returns (CreateLaptopResponse) {}
+  rpc SearchLaptop(SearchLaptopRequest) returns (stream SearchLaptopResponse) {}
 }

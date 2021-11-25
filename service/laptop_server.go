@@ -64,8 +64,33 @@ func (s *LaptopServer) CreateLaptop(ctx context.Context, req *pb.CreateLaptopReq
 		return nil, status.Errorf(code, "failed to save laptop: %v", err)
 	}
 
-	log.Printf("saved laptop with id - %s: %v", laptop.Id, laptop)
+	log.Printf("saved laptop with id - %s: %v", laptop.GetId(), laptop)
 	return &pb.CreateLaptopResponse{
 		Id: laptop.Id,
 	}, nil
+}
+
+// SearchLaptop is a server-streaming RPC to search for laptops.
+func (s *LaptopServer) SearchLaptop(req *pb.SearchLaptopRequest, stream pb.LaptopService_SearchLaptopServer) error {
+	filter := req.GetFilter()
+	log.Printf("recieved SearchLaptop(_) request with filter - %v", filter)
+
+	err := s.Store.Search(filter, func(laptop *pb.Laptop) error {
+		res := &pb.SearchLaptopResponse{
+			Laptop: laptop,
+		}
+
+		if err := stream.Send(res); err != nil {
+			return err
+		}
+
+		log.Printf("sent SearchLaptop(_) response with laptop - %v", laptop.GetId())
+		return nil
+	})
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to search laptops: %v", err)
+	}
+
+	return nil
 }
