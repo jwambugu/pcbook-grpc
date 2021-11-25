@@ -45,6 +45,16 @@ func (s *LaptopServer) CreateLaptop(ctx context.Context, req *pb.CreateLaptopReq
 		laptop.Id = id.String()
 	}
 
+	if ctx.Err() == context.Canceled {
+		log.Println("CreateLaptop(_) RPC request cancelled")
+		return nil, status.Error(codes.Canceled, "request cancelled by the client")
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		log.Println("CreateLaptop(_) RPC request deadline timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request deadline timed out")
+	}
+
 	if err := s.Store.Save(laptop); err != nil {
 		code := codes.Internal
 		if errors.Is(err, ErrRecordExists) {
