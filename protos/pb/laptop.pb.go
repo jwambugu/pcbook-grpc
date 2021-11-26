@@ -462,6 +462,199 @@ func (x *SearchLaptopResponse) GetLaptop() *Laptop {
 	return nil
 }
 
+// ImageInfo represents the information of an image
+type ImageInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	LaptopId      string `protobuf:"bytes,1,opt,name=laptop_id,json=laptopId,proto3" json:"laptop_id,omitempty"`
+	FileExtension string `protobuf:"bytes,2,opt,name=file_extension,json=fileExtension,proto3" json:"file_extension,omitempty"`
+}
+
+func (x *ImageInfo) Reset() {
+	*x = ImageInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_laptop_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ImageInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImageInfo) ProtoMessage() {}
+
+func (x *ImageInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_laptop_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImageInfo.ProtoReflect.Descriptor instead.
+func (*ImageInfo) Descriptor() ([]byte, []int) {
+	return file_laptop_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ImageInfo) GetLaptopId() string {
+	if x != nil {
+		return x.LaptopId
+	}
+	return ""
+}
+
+func (x *ImageInfo) GetFileExtension() string {
+	if x != nil {
+		return x.FileExtension
+	}
+	return ""
+}
+
+// UploadImageRequest represents the request message for the UploadImage RPC
+type UploadImageRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Data:
+	//	*UploadImageRequest_Info
+	//	*UploadImageRequest_ChunkData
+	Data isUploadImageRequest_Data `protobuf_oneof:"data"`
+}
+
+func (x *UploadImageRequest) Reset() {
+	*x = UploadImageRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_laptop_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UploadImageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadImageRequest) ProtoMessage() {}
+
+func (x *UploadImageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_laptop_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadImageRequest.ProtoReflect.Descriptor instead.
+func (*UploadImageRequest) Descriptor() ([]byte, []int) {
+	return file_laptop_proto_rawDescGZIP(), []int{7}
+}
+
+func (m *UploadImageRequest) GetData() isUploadImageRequest_Data {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+func (x *UploadImageRequest) GetInfo() *ImageInfo {
+	if x, ok := x.GetData().(*UploadImageRequest_Info); ok {
+		return x.Info
+	}
+	return nil
+}
+
+func (x *UploadImageRequest) GetChunkData() []byte {
+	if x, ok := x.GetData().(*UploadImageRequest_ChunkData); ok {
+		return x.ChunkData
+	}
+	return nil
+}
+
+type isUploadImageRequest_Data interface {
+	isUploadImageRequest_Data()
+}
+
+type UploadImageRequest_Info struct {
+	Info *ImageInfo `protobuf:"bytes,1,opt,name=info,proto3,oneof"`
+}
+
+type UploadImageRequest_ChunkData struct {
+	ChunkData []byte `protobuf:"bytes,2,opt,name=chunk_data,json=chunkData,proto3,oneof"`
+}
+
+func (*UploadImageRequest_Info) isUploadImageRequest_Data() {}
+
+func (*UploadImageRequest_ChunkData) isUploadImageRequest_Data() {}
+
+// UploadImageResponse represents the response message for the UploadImage RPC
+type UploadImageResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Size uint32 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
+}
+
+func (x *UploadImageResponse) Reset() {
+	*x = UploadImageResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_laptop_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UploadImageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadImageResponse) ProtoMessage() {}
+
+func (x *UploadImageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_laptop_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadImageResponse.ProtoReflect.Descriptor instead.
+func (*UploadImageResponse) Descriptor() ([]byte, []int) {
+	return file_laptop_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UploadImageResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UploadImageResponse) GetSize() uint32 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
 var File_laptop_proto protoreflect.FileDescriptor
 
 var file_laptop_proto_rawDesc = []byte{
@@ -528,18 +721,38 @@ var file_laptop_proto_rawDesc = []byte{
 	0x0a, 0x14, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x65,
 	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a, 0x06, 0x6c, 0x61, 0x70, 0x74, 0x6f, 0x70,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e,
-	0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x06, 0x6c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x32, 0xab,
-	0x01, 0x0a, 0x0d, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
-	0x12, 0x4b, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70,
-	0x12, 0x1b, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e,
-	0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x61, 0x70,
-	0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4d, 0x0a,
-	0x0c, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x12, 0x1b, 0x2e,
-	0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61, 0x70,
-	0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x70, 0x63, 0x62,
-	0x6f, 0x6f, 0x6b, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x42, 0x27, 0x0a, 0x1d,
+	0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x06, 0x6c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x22, 0x4f,
+	0x0a, 0x09, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1b, 0x0a, 0x09, 0x6c,
+	0x61, 0x70, 0x74, 0x6f, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08,
+	0x6c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x49, 0x64, 0x12, 0x25, 0x0a, 0x0e, 0x66, 0x69, 0x6c, 0x65,
+	0x5f, 0x65, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0d, 0x66, 0x69, 0x6c, 0x65, 0x45, 0x78, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x6f, 0x6e, 0x22,
+	0x66, 0x0a, 0x12, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x27, 0x0a, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x49, 0x6d, 0x61,
+	0x67, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x48, 0x00, 0x52, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x1f,
+	0x0a, 0x0a, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0c, 0x48, 0x00, 0x52, 0x09, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61, 0x74, 0x61, 0x42,
+	0x06, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x39, 0x0a, 0x13, 0x55, 0x70, 0x6c, 0x6f, 0x61,
+	0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12,
+	0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x73, 0x69,
+	0x7a, 0x65, 0x32, 0xf7, 0x01, 0x0a, 0x0d, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x4b, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x61,
+	0x70, 0x74, 0x6f, 0x70, 0x12, 0x1b, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1c, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x12, 0x4d, 0x0a, 0x0c, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61, 0x70, 0x74, 0x6f,
+	0x70, 0x12, 0x1b, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63,
+	0x68, 0x4c, 0x61, 0x70, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c,
+	0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4c, 0x61,
+	0x70, 0x74, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01,
+	0x12, 0x4a, 0x0a, 0x0b, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x12,
+	0x1a, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49,
+	0x6d, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x70, 0x63,
+	0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x28, 0x01, 0x42, 0x27, 0x0a, 0x1d,
 	0x63, 0x6f, 0x6d, 0x2e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x6a, 0x77, 0x61, 0x6d, 0x62,
 	0x75, 0x67, 0x75, 0x2e, 0x70, 0x63, 0x62, 0x6f, 0x6f, 0x6b, 0x2e, 0x70, 0x62, 0x50, 0x01, 0x5a,
 	0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
@@ -557,7 +770,7 @@ func file_laptop_proto_rawDescGZIP() []byte {
 	return file_laptop_proto_rawDescData
 }
 
-var file_laptop_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_laptop_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_laptop_proto_goTypes = []interface{}{
 	(*Laptop)(nil),                // 0: pcbook.Laptop
 	(*Filter)(nil),                // 1: pcbook.Filter
@@ -565,35 +778,41 @@ var file_laptop_proto_goTypes = []interface{}{
 	(*CreateLaptopResponse)(nil),  // 3: pcbook.CreateLaptopResponse
 	(*SearchLaptopRequest)(nil),   // 4: pcbook.SearchLaptopRequest
 	(*SearchLaptopResponse)(nil),  // 5: pcbook.SearchLaptopResponse
-	(*CPU)(nil),                   // 6: pcbook.CPU
-	(*Memory)(nil),                // 7: pcbook.Memory
-	(*GPU)(nil),                   // 8: pcbook.GPU
-	(*Storage)(nil),               // 9: pcbook.Storage
-	(*Screen)(nil),                // 10: pcbook.Screen
-	(*Keyboard)(nil),              // 11: pcbook.Keyboard
-	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*ImageInfo)(nil),             // 6: pcbook.ImageInfo
+	(*UploadImageRequest)(nil),    // 7: pcbook.UploadImageRequest
+	(*UploadImageResponse)(nil),   // 8: pcbook.UploadImageResponse
+	(*CPU)(nil),                   // 9: pcbook.CPU
+	(*Memory)(nil),                // 10: pcbook.Memory
+	(*GPU)(nil),                   // 11: pcbook.GPU
+	(*Storage)(nil),               // 12: pcbook.Storage
+	(*Screen)(nil),                // 13: pcbook.Screen
+	(*Keyboard)(nil),              // 14: pcbook.Keyboard
+	(*timestamppb.Timestamp)(nil), // 15: google.protobuf.Timestamp
 }
 var file_laptop_proto_depIdxs = []int32{
-	6,  // 0: pcbook.Laptop.cpu:type_name -> pcbook.CPU
-	7,  // 1: pcbook.Laptop.ram:type_name -> pcbook.Memory
-	8,  // 2: pcbook.Laptop.gpus:type_name -> pcbook.GPU
-	9,  // 3: pcbook.Laptop.storages:type_name -> pcbook.Storage
-	10, // 4: pcbook.Laptop.screen:type_name -> pcbook.Screen
-	11, // 5: pcbook.Laptop.keyboard:type_name -> pcbook.Keyboard
-	12, // 6: pcbook.Laptop.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 7: pcbook.Filter.min_ram:type_name -> pcbook.Memory
+	9,  // 0: pcbook.Laptop.cpu:type_name -> pcbook.CPU
+	10, // 1: pcbook.Laptop.ram:type_name -> pcbook.Memory
+	11, // 2: pcbook.Laptop.gpus:type_name -> pcbook.GPU
+	12, // 3: pcbook.Laptop.storages:type_name -> pcbook.Storage
+	13, // 4: pcbook.Laptop.screen:type_name -> pcbook.Screen
+	14, // 5: pcbook.Laptop.keyboard:type_name -> pcbook.Keyboard
+	15, // 6: pcbook.Laptop.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 7: pcbook.Filter.min_ram:type_name -> pcbook.Memory
 	0,  // 8: pcbook.CreateLaptopRequest.laptop:type_name -> pcbook.Laptop
 	1,  // 9: pcbook.SearchLaptopRequest.filter:type_name -> pcbook.Filter
 	0,  // 10: pcbook.SearchLaptopResponse.laptop:type_name -> pcbook.Laptop
-	2,  // 11: pcbook.LaptopService.CreateLaptop:input_type -> pcbook.CreateLaptopRequest
-	4,  // 12: pcbook.LaptopService.SearchLaptop:input_type -> pcbook.SearchLaptopRequest
-	3,  // 13: pcbook.LaptopService.CreateLaptop:output_type -> pcbook.CreateLaptopResponse
-	5,  // 14: pcbook.LaptopService.SearchLaptop:output_type -> pcbook.SearchLaptopResponse
-	13, // [13:15] is the sub-list for method output_type
-	11, // [11:13] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	6,  // 11: pcbook.UploadImageRequest.info:type_name -> pcbook.ImageInfo
+	2,  // 12: pcbook.LaptopService.CreateLaptop:input_type -> pcbook.CreateLaptopRequest
+	4,  // 13: pcbook.LaptopService.SearchLaptop:input_type -> pcbook.SearchLaptopRequest
+	7,  // 14: pcbook.LaptopService.UploadImage:input_type -> pcbook.UploadImageRequest
+	3,  // 15: pcbook.LaptopService.CreateLaptop:output_type -> pcbook.CreateLaptopResponse
+	5,  // 16: pcbook.LaptopService.SearchLaptop:output_type -> pcbook.SearchLaptopResponse
+	8,  // 17: pcbook.LaptopService.UploadImage:output_type -> pcbook.UploadImageResponse
+	15, // [15:18] is the sub-list for method output_type
+	12, // [12:15] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_laptop_proto_init() }
@@ -679,10 +898,50 @@ func file_laptop_proto_init() {
 				return nil
 			}
 		}
+		file_laptop_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ImageInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_laptop_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UploadImageRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_laptop_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UploadImageResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_laptop_proto_msgTypes[0].OneofWrappers = []interface{}{
 		(*Laptop_WeightKg)(nil),
 		(*Laptop_WeightLb)(nil),
+	}
+	file_laptop_proto_msgTypes[7].OneofWrappers = []interface{}{
+		(*UploadImageRequest_Info)(nil),
+		(*UploadImageRequest_ChunkData)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -690,7 +949,7 @@ func file_laptop_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_laptop_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

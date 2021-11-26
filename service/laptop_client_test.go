@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"github.com/jwambugu/pcbook-grpc/factory"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
 	"github.com/jwambugu/pcbook-grpc/serializer"
@@ -9,11 +11,13 @@ import (
 	"google.golang.org/grpc"
 	"io"
 	"net"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func startLaptopTestServer(t *testing.T, store LaptopStore) (*LaptopServer, string) {
-	laptopServer := NewLaptopServer(store)
+func startLaptopTestServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore) string {
+	laptopServer := NewLaptopServer(laptopStore, imageStore)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
@@ -26,7 +30,7 @@ func startLaptopTestServer(t *testing.T, store LaptopStore) (*LaptopServer, stri
 		require.NoError(t, err)
 	}()
 
-	return laptopServer, listener.Addr().String()
+	return listener.Addr().String()
 }
 
 func newTestLaptopClient(t *testing.T, address string) pb.LaptopServiceClient {
@@ -49,7 +53,9 @@ func requireSameLaptop(t *testing.T, expected *pb.Laptop, actual *pb.Laptop) {
 func TestLaptopClient_CreateLaptop(t *testing.T) {
 	t.Parallel()
 
-	laptopServer, serverAddress := startLaptopTestServer(t, NewInMemoryLaptopStore())
+	laptopStore := NewInMemoryLaptopStore()
+
+	serverAddress := startLaptopTestServer(t, laptopStore, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	laptop := factory.NewLaptop()
@@ -64,7 +70,7 @@ func TestLaptopClient_CreateLaptop(t *testing.T) {
 	require.NotNil(t, res)
 	require.Equal(t, expectedLaptopID, res.Id)
 
-	createdLaptop, err := laptopServer.Store.Find(res.Id)
+	createdLaptop, err := laptopStore.Find(res.Id)
 	require.NoError(t, err)
 	require.NotNil(t, createdLaptop)
 
@@ -84,7 +90,7 @@ func TestLaptopServer_SearchLaptop(t *testing.T) {
 		},
 	}
 
-	store := NewInMemoryLaptopStore()
+	laptopStore := NewInMemoryLaptopStore()
 	expectedIDS := make(map[string]struct{})
 
 	for i := 0; i < 6; i++ {
@@ -115,11 +121,11 @@ func TestLaptopServer_SearchLaptop(t *testing.T) {
 			expectedIDS[laptop.Id] = struct{}{}
 		}
 
-		err := store.Save(laptop)
+		err := laptopStore.Save(laptop)
 		require.NoError(t, err)
 	}
 
-	_, serverAddress := startLaptopTestServer(t, store)
+	serverAddress := startLaptopTestServer(t, laptopStore, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	req := &pb.SearchLaptopRequest{Filter: filter}
@@ -140,4 +146,79 @@ func TestLaptopServer_SearchLaptop(t *testing.T) {
 	}
 
 	require.Equal(t, len(expectedIDS), found)
+}
+
+func TestLaptopServer_UploadImage(t *testing.T) {
+	t.Parallel()
+
+	testImagesFolder := "../tmp"
+
+	laptopStore := NewInMemoryLaptopStore()
+	imageStore := NewDiskImageStore(testImagesFolder)
+
+	laptop := factory.NewLaptop()
+
+	err := laptopStore.Save(laptop)
+	require.NoError(t, err)
+
+	serverAddress := startLaptopTestServer(t, laptopStore, imageStore)
+	laptopClient := newTestLaptopClient(t, serverAddress)
+
+	imagePath := fmt.Sprintf("%s/laptop.jpg", testImagesFolder)
+
+	file, err := os.Open(imagePath)
+	require.NoError(t, err)
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	stream, err := laptopClient.UploadImage(context.Background())
+	require.NoError(t, err)
+
+	ext := filepath.Ext(imagePath)
+
+	req := &pb.UploadImageRequest{
+		Data: &pb.UploadImageRequest_Info{
+			Info: &pb.ImageInfo{
+				LaptopId:      laptop.GetId(),
+				FileExtension: ext,
+			},
+		},
+	}
+
+	err = stream.Send(req)
+	require.NoError(t, err)
+
+	reader := bufio.NewReader(file)
+	buffer := make([]byte, 1024)
+	size := 0
+
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+
+		require.NoError(t, err)
+		size += n
+
+		req := &pb.UploadImageRequest{
+			Data: &pb.UploadImageRequest_ChunkData{
+				ChunkData: buffer[:n],
+			},
+		}
+
+		err = stream.Send(req)
+		require.NoError(t, err)
+	}
+
+	res, err := stream.CloseAndRecv()
+	require.NoError(t, err)
+	require.NotEmpty(t, res.GetId())
+	require.EqualValues(t, size, res.GetSize())
+
+	uploadedImagePath := fmt.Sprintf("%s/%s%s", testImagesFolder, res.GetId(), ext)
+	require.FileExists(t, uploadedImagePath)
+	require.NoError(t, os.Remove(uploadedImagePath))
 }
