@@ -141,7 +141,7 @@ func TestLaptopServer_SearchLaptop(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Contains(t, expectedIDS, res.Laptop.Id)
+		require.Contains(t, expectedIDS, res.Laptop.GetId())
 		found += 1
 	}
 
