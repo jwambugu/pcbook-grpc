@@ -1,12 +1,13 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/jwambugu/pcbook-grpc/protos/pb"
-	"sync"
-
 	"github.com/jinzhu/copier"
+	"github.com/jwambugu/pcbook-grpc/protos/pb"
+	"log"
+	"sync"
 )
 
 // ErrRecordExists is an error that is returned when a record already exists
@@ -20,7 +21,7 @@ type LaptopStore interface {
 	Find(id string) (*pb.Laptop, error)
 
 	// Search finds laptops by their properties using a filter, returns one by one laptop via the found function
-	Search(filter *pb.Filter, found func(laptop *pb.Laptop) error) error
+	Search(ctx context.Context, filter *pb.Filter, found func(laptop *pb.Laptop) error) error
 }
 
 // InMemoryLaptopStore is an in-memory implementation of a LaptopStore
@@ -120,11 +121,19 @@ func (store *InMemoryLaptopStore) Find(id string) (*pb.Laptop, error) {
 }
 
 // Search finds laptops by their properties using a filter, returns one by one laptop via the found function
-func (store *InMemoryLaptopStore) Search(filter *pb.Filter, match func(laptop *pb.Laptop) error) error {
+func (store *InMemoryLaptopStore) Search(
+	ctx context.Context, filter *pb.Filter,
+	match func(laptop *pb.Laptop) error,
+) error {
 	store.mutext.RLock()
 	defer store.mutext.RUnlock()
 
 	for _, laptop := range store.data {
+		if ctx.Err() == context.Canceled || ctx.Err() == context.DeadlineExceeded {
+			log.Printf("error searching laptop: %s context cancelled: %v", laptop.Id, ctx.Err())
+			return errors.New("searching laptop context cancelled")
+		}
+
 		if matchesFilter(filter, laptop) {
 			foundLaptop, err := deepCopy(laptop)
 			if err != nil {
