@@ -16,8 +16,8 @@ import (
 	"testing"
 )
 
-func startLaptopTestServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore) string {
-	laptopServer := NewLaptopServer(laptopStore, imageStore)
+func startLaptopTestServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore, ratingStore RatingStore) string {
+	laptopServer := NewLaptopServer(laptopStore, imageStore, ratingStore)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
@@ -55,7 +55,7 @@ func TestLaptopClient_CreateLaptop(t *testing.T) {
 
 	laptopStore := NewInMemoryLaptopStore()
 
-	serverAddress := startLaptopTestServer(t, laptopStore, nil)
+	serverAddress := startLaptopTestServer(t, laptopStore, nil, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	laptop := factory.NewLaptop()
@@ -125,7 +125,7 @@ func TestLaptopServer_SearchLaptop(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	serverAddress := startLaptopTestServer(t, laptopStore, nil)
+	serverAddress := startLaptopTestServer(t, laptopStore, nil, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	req := &pb.SearchLaptopRequest{Filter: filter}
@@ -161,7 +161,7 @@ func TestLaptopServer_UploadImage(t *testing.T) {
 	err := laptopStore.Save(laptop)
 	require.NoError(t, err)
 
-	serverAddress := startLaptopTestServer(t, laptopStore, imageStore)
+	serverAddress := startLaptopTestServer(t, laptopStore, imageStore, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	imagePath := fmt.Sprintf("%s/laptop.jpg", testImagesFolder)
