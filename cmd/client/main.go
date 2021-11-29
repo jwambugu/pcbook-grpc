@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"flag"
+	"fmt"
 	"github.com/jwambugu/pcbook-grpc/factory"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
 	"google.golang.org/grpc"
@@ -13,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -164,6 +166,92 @@ func testUploadImage(laptopClient pb.LaptopServiceClient) {
 	uploadImage(laptopClient, laptop.GetId(), "tmp/laptop.jpg")
 }
 
+func rateLaptop(laptopClient pb.LaptopServiceClient, laptopIDS []string, scores []float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := laptopClient.RateLaptop(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create rate laptop stream: %v", err)
+	}
+
+	responseErrorChan := make(chan error)
+	// Receive the response from the server
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				log.Printf("rate laptop stream completed")
+				responseErrorChan <- nil
+				return
+			}
+
+			if err != nil {
+				log.Printf("failed to receive response: %v", err)
+				responseErrorChan <- err
+				return
+			}
+
+			log.Printf("rate laptop response: %v", res)
+		}
+	}()
+
+	// Send requests to the server
+	for i, id := range laptopIDS {
+		req := &pb.RateLaptopRequest{
+			LaptopId: id,
+			Score:    scores[i],
+		}
+
+		if err := stream.Send(req); err != nil {
+			return fmt.Errorf("failed to send request: %v - %v", err, stream.RecvMsg(nil))
+		}
+
+		log.Printf("sent rate laptop request: %v", req)
+	}
+
+	err = stream.CloseSend()
+	if err != nil {
+		return fmt.Errorf("failed to close stream: %v", err)
+	}
+
+	err = <-responseErrorChan
+	return err
+}
+
+func testRateLaptop(laptopClient pb.LaptopServiceClient) {
+	n := 3
+	laptopIDS := make([]string, n)
+
+	for i := 0; i < n; i++ {
+		laptop := factory.NewLaptop()
+
+		createLaptop(laptopClient, laptop)
+		laptopIDS[i] = laptop.GetId()
+	}
+
+	scores := make([]float64, n)
+	for {
+		fmt.Println("[*] rate laptop: (y/n)")
+		var input string
+		_, _ = fmt.Scan(&input)
+
+		if strings.ToLower(input) != "y" {
+			break
+		}
+
+		for i := 0; i < n; i++ {
+			scores[i] = factory.RandomLaptopScore()
+		}
+
+		fmt.Println(scores)
+
+		if err := rateLaptop(laptopClient, laptopIDS, scores); err != nil {
+			log.Fatalf("failed to rate laptop: %v", err)
+		}
+	}
+}
+
 func main() {
 	serverAddress := flag.String("server-address", "0.0.0.0:8080", "the server address")
 	flag.Parse()
@@ -176,5 +264,7 @@ func main() {
 	}
 
 	laptopClient := pb.NewLaptopServiceClient(conn)
-	testUploadImage(laptopClient)
+	//testUploadImage(laptopClient)
+
+	testRateLaptop(laptopClient)
 }

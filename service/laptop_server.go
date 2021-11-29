@@ -20,13 +20,15 @@ type LaptopServer struct {
 
 	laptopStore LaptopStore
 	imageStore  ImageStore
+	ratingStore RatingStore
 }
 
 // NewLaptopServer creates a new LaptopServer.
-func NewLaptopServer(laptopStore LaptopStore, imageStore ImageStore) *LaptopServer {
+func NewLaptopServer(laptopStore LaptopStore, imageStore ImageStore, ratingStore RatingStore) *LaptopServer {
 	return &LaptopServer{
 		laptopStore: laptopStore,
 		imageStore:  imageStore,
+		ratingStore: ratingStore,
 	}
 }
 
@@ -190,5 +192,62 @@ func (s *LaptopServer) UploadImage(stream pb.LaptopService_UploadImageServer) er
 
 	log.Printf("UploadImage(_) saved image with id - %s, size - %d", imageID, imageSize)
 
+	return nil
+}
+
+// RateLaptop is a bidirectional streaming RPC to rate laptops.
+func (s *LaptopServer) RateLaptop(stream pb.LaptopService_RateLaptopServer) error {
+	for {
+		err := contextError(stream.Context())
+		if err != nil {
+			log.Printf("RateLaptop(_) context error: %v", err)
+			return err
+		}
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Printf("RateLaptop(_) no more ratings")
+			break
+		}
+
+		if err != nil {
+			log.Printf("RateLaptop(_) failed to receive request: %v", err)
+			return status.Errorf(codes.Unknown, "failed to receive request: %v", err)
+		}
+
+		laptopID := req.GetLaptopId()
+		score := req.GetScore()
+
+		log.Printf("RateLaptop(_) received rating for laptop - %s, score - %f", laptopID, score)
+
+		foundLaptop, err := s.laptopStore.Find(laptopID)
+		if err != nil {
+			log.Printf("RateLaptop(_) failed to find laptop %v", err)
+			return status.Errorf(codes.Internal, "failed to find laptop %v", err)
+		}
+
+		if foundLaptop == nil {
+			log.Printf("RateLaptop(_) laptop %v not found", laptopID)
+			return status.Errorf(codes.NotFound, "laptop %s not found", laptopID)
+		}
+
+		rating, err := s.ratingStore.Add(laptopID, score)
+		if err != nil {
+			log.Printf("RateLaptop(_) failed to add rating: %v", err)
+			return status.Errorf(codes.Internal, "failed to add rating: %v", err)
+		}
+
+		res := &pb.RateLaptopResponse{
+			LaptopId:     laptopID,
+			RatingsCount: rating.Count,
+			AverageScore: rating.Sum / float64(rating.Count),
+		}
+
+		err = stream.Send(res)
+		if err != nil {
+			log.Printf("RateLaptop(_) failed to send response: %v", err)
+			return status.Errorf(codes.Internal, "failed to send response: %v", err)
+		}
+	}
 	return nil
 }
