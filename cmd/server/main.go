@@ -6,6 +6,7 @@ import (
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
 	"github.com/jwambugu/pcbook-grpc/service"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 )
@@ -24,6 +25,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
+	reflection.Register(grpcServer)
 
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
 
