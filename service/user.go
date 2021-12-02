@@ -18,6 +18,7 @@ func NewUser(username, password, role string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error hashing password: %v", err)
 	}
+
 	user := &User{
 		Username:       username,
 		HashedPassword: string(hashedPassword),
