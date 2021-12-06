@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
@@ -19,18 +18,6 @@ const (
 	jwtTokenDuration = 15 * time.Minute
 )
 
-// unaryInterceptor provides a hook to intercept the execution of a streaming RPC on the server. of a unary RPC on the server
-func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	log.Printf("[*] unaryInterceptor(_) %v", info.FullMethod)
-	return handler(ctx, req)
-}
-
-// streamInterceptor provides a hook to intercept the execution of a streaming RPC on the server.
-func streamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	log.Printf("[*] streamInterceptor(_) %v", info.FullMethod)
-	return handler(srv, ss)
-}
-
 func createUser(userStore service.UserStore, username, password, role string) error {
 	user, err := service.NewUser(username, password, role)
 	if err != nil {
@@ -46,6 +33,16 @@ func seedUsers(userStore service.UserStore) error {
 	}
 
 	return createUser(userStore, "user", "secret", "user")
+}
+
+func accessibleRoles() map[string][]string {
+	const laptopServicePath = "/pcbook.LaptopService"
+
+	return map[string][]string{
+		fmt.Sprintf("%s/CreateLaptop", laptopServicePath): {"admin"},
+		fmt.Sprintf("%s/UploadImage", laptopServicePath):  {"admin"},
+		fmt.Sprintf("%s/RateLaptop", laptopServicePath):   {"admin", "user"},
+	}
 }
 
 func main() {
@@ -66,11 +63,12 @@ func main() {
 	laptopStore := service.NewInMemoryLaptopStore()
 	imageStore := service.NewDiskImageStore("storage/public")
 	ratingStore := service.NewInMemoryRatingStore()
-
 	laptopServer := service.NewLaptopServer(laptopStore, imageStore, ratingStore)
+
+	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(unaryInterceptor),
-		grpc.StreamInterceptor(streamInterceptor),
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
 	)
 
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
