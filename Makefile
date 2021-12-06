@@ -12,3 +12,5 @@ run-server:
 
 run-client:
 	go run cmd/client/main.go -server-address 0.0.0.0:8080
+
+.PHONY: gen-protos clean-protos test run-client run-server
