@@ -17,7 +17,7 @@ The web service has the following services:
 
 ## Generate TLS Certificates
 
-To run the client and the server on `tls modde`, you need to generate the certificates.
+To run the client and the server on `tls mode`, you need to generate the certificates.
 
 ```bash
   make gen-cert
