@@ -16,4 +16,4 @@ run-client:
 gen-cert:
 	cd certs; ./gen.sh; cd ..
 
-.PHONY: gen-protos clean-protos test run-client run-server
+.PHONY: gen-protos clean-protos test run-client run-server gen-cert
