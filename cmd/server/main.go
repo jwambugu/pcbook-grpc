@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
@@ -9,8 +10,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
+	"io"
 	"log"
 	"net"
+	"os"
 	"time"
 )
 
@@ -48,6 +51,23 @@ func accessibleRoles() map[string][]string {
 }
 
 func loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load certificate of the CA that signed the client's certificate
+	// Allows the client to verify authenticity the client's certificate
+	file, err := os.Open("certs/ca-cert.pem")
+	if err != nil {
+		return nil, fmt.Errorf("failed to open server CA pem: %v", err)
+	}
+
+	contents, err := io.ReadAll(file)
+	if err != nil && err != io.EOF {
+		return nil, fmt.Errorf("failed to read client CA pem: %v", err)
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(contents) {
+		return nil, fmt.Errorf("failed to append client CA pem to cert pool")
+	}
+
 	// Load server's certificate and private key
 	serverCert, err := tls.LoadX509KeyPair("certs/server-cert.pem", "certs/server-key.pem")
 	if err != nil {
@@ -56,7 +76,8 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 
 	config := &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
-		ClientAuth:   tls.NoClientCert,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
 	}
 
 	return credentials.NewTLS(config), nil
