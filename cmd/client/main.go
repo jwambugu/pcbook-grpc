@@ -121,23 +121,28 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 
 func main() {
 	serverAddress := flag.String("server-address", "0.0.0.0:8080", "the server address")
+	enableTLS := flag.Bool("enable-tls", false, "enables TLS")
 	flag.Parse()
 
-	log.Printf("dialing server %s...", *serverAddress)
+	log.Printf("dialing server %s -enable-tls = %t", *serverAddress, *enableTLS)
 
-	tlsCredentials, err := loadTLSCredentials()
-	if err != nil {
-		log.Fatalln(err)
+	transportOption := grpc.WithInsecure()
+
+	if *enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			log.Fatalf("failed to load TLS credentials: %v", err)
+		}
+
+		transportOption = grpc.WithTransportCredentials(tlsCredentials)
 	}
 
-	conn, err := grpc.Dial(*serverAddress, grpc.WithTransportCredentials(tlsCredentials))
+	conn, err := grpc.Dial(*serverAddress, transportOption)
 	if err != nil {
 		log.Fatalf("failed to dial server %s: %v", *serverAddress, err)
 	}
 
 	authClient := client.NewAuthClient(conn, "admin", "secret")
-
-	fmt.Println(authMethods())
 
 	interceptor, err := client.NewAuthInterceptor(authClient, authMethods(), refreshDuration)
 	if err != nil {
@@ -146,7 +151,7 @@ func main() {
 
 	cc, err := grpc.Dial(
 		*serverAddress,
-		grpc.WithTransportCredentials(tlsCredentials),
+		transportOption,
 		grpc.WithUnaryInterceptor(interceptor.Unary()),
 		grpc.WithStreamInterceptor(interceptor.Stream()),
 	)
