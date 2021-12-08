@@ -13,4 +13,7 @@ run-server:
 run-client:
 	go run cmd/client/main.go -server-address 0.0.0.0:8080
 
+gen-cert:
+	cd certs; ./gen.sh; cd ..
+
 .PHONY: gen-protos clean-protos test run-client run-server
