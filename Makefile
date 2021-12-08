@@ -8,10 +8,10 @@ test:
 	go test -cover -race ./...
 
 run-server:
-	go run cmd/server/main.go -port 8080
+	go run cmd/server/main.go -port 8080 -enable-tls
 
 run-client:
-	go run cmd/client/main.go -server-address 0.0.0.0:8080
+	go run cmd/client/main.go -server-address 0.0.0.0:8080 -enable-tls
 
 gen-cert:
 	cd certs; ./gen.sh; cd ..
