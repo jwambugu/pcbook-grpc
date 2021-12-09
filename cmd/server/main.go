@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
 	"fmt"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jwambugu/pcbook-grpc/protos/pb"
 	"github.com/jwambugu/pcbook-grpc/service"
 	"google.golang.org/grpc"
@@ -13,6 +15,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"time"
 )
@@ -21,7 +24,18 @@ const (
 	// TODO: read from config
 	jwtSecretKey     = "67#$>-,x?`TSZe]\"<B{}&}8}/Gj]b$T>"
 	jwtTokenDuration = 15 * time.Minute
+
+	serverCertFile = "certs/server-cert.pem"
+	serverKeyFile  = "certs/server-key.pem"
 )
+
+type runServerOpts struct {
+	listener       net.Listener
+	authUserServer pb.AuthServiceServer
+	laptopServer   pb.LaptopServiceServer
+	jwtManager     *service.JWTManager
+	enableTLS      bool
+}
 
 func createUser(userStore service.UserStore, username, password, role string) error {
 	user, err := service.NewUser(username, password, role)
@@ -69,7 +83,7 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 	}
 
 	// Load server's certificate and private key
-	serverCert, err := tls.LoadX509KeyPair("certs/server-cert.pem", "certs/server-key.pem")
+	serverCert, err := tls.LoadX509KeyPair(serverCertFile, serverKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +97,63 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 	return credentials.NewTLS(config), nil
 }
 
+// runGRPCServer runs the gRPC server with the given options
+func runGRPCServer(opts runServerOpts) error {
+	interceptor := service.NewAuthInterceptor(opts.jwtManager, accessibleRoles())
+
+	serverOptions := []grpc.ServerOption{
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
+	}
+
+	if opts.enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			return fmt.Errorf("could not load TLS credentials: %v", err)
+		}
+
+		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
+	}
+
+	grpcServer := grpc.NewServer(serverOptions...)
+
+	pb.RegisterLaptopServiceServer(grpcServer, opts.laptopServer)
+	pb.RegisterAuthServiceServer(grpcServer, opts.authUserServer)
+	reflection.Register(grpcServer)
+
+	log.Printf("Starting GRPC server on %s, TLS = %t", opts.listener.Addr().String(), opts.enableTLS)
+	return grpcServer.Serve(opts.listener)
+}
+
+// runRESTServer runs the REST server with the given options
+func runRESTServer(opts runServerOpts) error {
+	mux := runtime.NewServeMux()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	if err := pb.RegisterAuthServiceHandlerServer(ctx, mux, opts.authUserServer); err != nil {
+		return err
+	}
+
+	if err := pb.RegisterLaptopServiceHandlerServer(ctx, mux, opts.laptopServer); err != nil {
+		return err
+	}
+
+	log.Printf("Starting REST server on %s, TLS = %t", opts.listener.Addr().String(), opts.enableTLS)
+
+	if opts.enableTLS {
+		return http.ServeTLS(opts.listener, mux, serverCertFile, serverKeyFile)
+	}
+
+	return http.Serve(opts.listener, mux)
+}
+
 func main() {
 	port := flag.Int("port", 8080, "server port to listen on")
 	enableTLS := flag.Bool("enable-tls", false, "enables TLS")
+	serverType := flag.String("server-type", "grpc", "type of server to run -  (grpc/rest)")
 	flag.Parse()
-
-	log.Printf("starting server on port %d: -enable-tls = %t", *port, *enableTLS)
 
 	userStore := service.NewInMemoryUserStore()
 
@@ -104,28 +169,6 @@ func main() {
 	ratingStore := service.NewInMemoryRatingStore()
 	laptopServer := service.NewLaptopServer(laptopStore, imageStore, ratingStore)
 
-	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
-
-	serverOptions := []grpc.ServerOption{
-		grpc.UnaryInterceptor(interceptor.Unary()),
-		grpc.StreamInterceptor(interceptor.Stream()),
-	}
-
-	if *enableTLS {
-		tlsCredentials, err := loadTLSCredentials()
-		if err != nil {
-			log.Fatalf("could not load TLS credentials: %v", err)
-		}
-
-		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
-	}
-
-	grpcServer := grpc.NewServer(serverOptions...)
-
-	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
-	pb.RegisterAuthServiceServer(grpcServer, authUserServer)
-	reflection.Register(grpcServer)
-
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
 
 	listen, err := net.Listen("tcp", address)
@@ -133,7 +176,21 @@ func main() {
 		log.Fatalf("could not listen on %s: %v", address, err)
 	}
 
-	if err := grpcServer.Serve(listen); err != nil {
-		log.Fatalf("could not start server: %v", err)
+	opts := runServerOpts{
+		listener:       listen,
+		authUserServer: authUserServer,
+		laptopServer:   laptopServer,
+		jwtManager:     jwtManager,
+		enableTLS:      *enableTLS,
+	}
+
+	if *serverType == "grpc" {
+		err = runGRPCServer(opts)
+	} else {
+		err = runRESTServer(opts)
+	}
+
+	if err != nil {
+		log.Fatalf("could not run %s server: %v", *serverType, err)
 	}
 }
