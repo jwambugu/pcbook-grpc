@@ -23,18 +23,31 @@ To run the client and the server on `tls mode`, you need to generate the certifi
   make gen-cert
 ```
 
-## Running Server
+## Running Servers
 
-To run the client, run the following command
+By default, all servers run with the `enable-tls` flag enabled.
+
+To run the client, run the following command:
 
 ```bash
   make run-client
 ```
 
-To run the server, run the following command
+The app supports two types of servers:
+
+- gRPC
+- REST (HTTP) using [GRPC Gateway](https://github.com/grpc-ecosystem/grpc-gateway)
+
+To run the gRPC server, run the following command:
 
 ```bash
-  make run-server
+  make run-grpc-server
+```
+
+To run the REST server, run the following command:
+
+```bash
+  make run-rest-server
 ```
 
 ## Running Tests
