@@ -1,0 +1,590 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "laptop_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "LaptopService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/laptop": {
+      "post": {
+        "operationId": "LaptopService_CreateLaptop",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pcbookCreateLaptopResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pcbookCreateLaptopRequest"
+            }
+          }
+        ],
+        "tags": [
+          "LaptopService"
+        ]
+      }
+    },
+    "/v1/laptop/rate": {
+      "post": {
+        "operationId": "LaptopService_RateLaptop",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/pcbookRateLaptopResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of pcbookRateLaptopResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pcbookRateLaptopRequest"
+            }
+          }
+        ],
+        "tags": [
+          "LaptopService"
+        ]
+      }
+    },
+    "/v1/laptop/search": {
+      "get": {
+        "operationId": "LaptopService_SearchLaptop",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/pcbookSearchLaptopResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of pcbookSearchLaptopResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filter.maxPriceUsd",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "filter.minCpuCores",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "filter.minCpuFrequency",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "filter.minRam.value",
+            "description": "Value is the total capacity of the computer's memory.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "filter.minRam.unit",
+            "description": "Unit indicates the unit of measurement.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "BIT",
+              "BYTE",
+              "KILOBYTE",
+              "MEGABYTE",
+              "GIGABYTE",
+              "TERABYTE"
+            ],
+            "default": "UNKNOWN"
+          }
+        ],
+        "tags": [
+          "LaptopService"
+        ]
+      }
+    },
+    "/v1/laptop/upload-image": {
+      "post": {
+        "operationId": "LaptopService_UploadImage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pcbookUploadImageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pcbookUploadImageRequest"
+            }
+          }
+        ],
+        "tags": [
+          "LaptopService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "KeyboardLayout": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "QWERTY",
+        "QWERTZ",
+        "AZERTY"
+      ],
+      "default": "UNKNOWN"
+    },
+    "MemoryUnit": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "BIT",
+        "BYTE",
+        "KILOBYTE",
+        "MEGABYTE",
+        "GIGABYTE",
+        "TERABYTE"
+      ],
+      "default": "UNKNOWN"
+    },
+    "ScreenPanel": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "IPS",
+        "OLED"
+      ],
+      "default": "UNKNOWN"
+    },
+    "ScreenResolution": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Width of the screen."
+        },
+        "height": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Height of the screen."
+        }
+      },
+      "description": "Resolution is the resolution of the screen."
+    },
+    "StorageDriver": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "HDD",
+        "SSD"
+      ],
+      "default": "UNKNOWN"
+    },
+    "pcbookCPU": {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "The brand of the CPU."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the CPU."
+        },
+        "numberOfCores": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of cores in the CPU."
+        },
+        "numberOfThreads": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of threads in the CPU."
+        },
+        "minimumFrequency": {
+          "type": "number",
+          "format": "double",
+          "description": "The minimum frequency of the CPU."
+        },
+        "maximumFrequency": {
+          "type": "number",
+          "format": "double",
+          "description": "The maximum frequency of the CPU."
+        }
+      },
+      "description": "CPU is a processor that is used in a pc."
+    },
+    "pcbookCreateLaptopRequest": {
+      "type": "object",
+      "properties": {
+        "laptop": {
+          "$ref": "#/definitions/pcbookLaptop"
+        }
+      },
+      "title": "CreateLaptopRequest is the request message for the CreateLaptop RPC"
+    },
+    "pcbookCreateLaptopResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "CreateLaptopResponse is the response message for the CreateLaptop RPC"
+    },
+    "pcbookFilter": {
+      "type": "object",
+      "properties": {
+        "maxPriceUsd": {
+          "type": "number",
+          "format": "double"
+        },
+        "minCpuCores": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "minCpuFrequency": {
+          "type": "number",
+          "format": "double"
+        },
+        "minRam": {
+          "$ref": "#/definitions/pcbookMemory"
+        }
+      },
+      "title": "Filter represents a filter for a laptop with the specified specs"
+    },
+    "pcbookGPU": {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "The brand of the GPU."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the GPU."
+        },
+        "minimumFrequency": {
+          "type": "number",
+          "format": "double",
+          "description": "The minimum frequency of the GPU."
+        },
+        "maximumFrequency": {
+          "type": "number",
+          "format": "double",
+          "description": "The maximum frequency of the GPU."
+        },
+        "memory": {
+          "$ref": "#/definitions/pcbookMemory",
+          "description": "The memory size of the GPU."
+        }
+      },
+      "description": "GPU is a graphic processing unit used on the pc."
+    },
+    "pcbookImageInfo": {
+      "type": "object",
+      "properties": {
+        "laptopId": {
+          "type": "string"
+        },
+        "fileExtension": {
+          "type": "string"
+        }
+      },
+      "title": "ImageInfo represents the information of an image"
+    },
+    "pcbookKeyboard": {
+      "type": "object",
+      "properties": {
+        "layout": {
+          "$ref": "#/definitions/KeyboardLayout",
+          "description": "Layout is the keyboard layout."
+        },
+        "isBacklit": {
+          "type": "boolean"
+        }
+      },
+      "description": "Keyboard is the type of keyboard used by a PC."
+    },
+    "pcbookLaptop": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "cpu": {
+          "$ref": "#/definitions/pcbookCPU"
+        },
+        "ram": {
+          "$ref": "#/definitions/pcbookMemory"
+        },
+        "gpus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pcbookGPU"
+          }
+        },
+        "storages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pcbookStorage"
+          }
+        },
+        "screen": {
+          "$ref": "#/definitions/pcbookScreen"
+        },
+        "keyboard": {
+          "$ref": "#/definitions/pcbookKeyboard"
+        },
+        "weightKg": {
+          "type": "number",
+          "format": "double"
+        },
+        "weightLb": {
+          "type": "number",
+          "format": "double"
+        },
+        "priceUsd": {
+          "type": "number",
+          "format": "double"
+        },
+        "releaseYear": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Laptop represents a laptop device"
+    },
+    "pcbookMemory": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "uint64",
+          "description": "Value is the total capacity of the computer's memory."
+        },
+        "unit": {
+          "$ref": "#/definitions/MemoryUnit",
+          "description": "Unit indicates the unit of measurement."
+        }
+      },
+      "description": "Memory is the total capacity of the computer's memory."
+    },
+    "pcbookRateLaptopRequest": {
+      "type": "object",
+      "properties": {
+        "laptopId": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "title": "RateLaptopRequest represents the request message for the RateLaptop RPC"
+    },
+    "pcbookRateLaptopResponse": {
+      "type": "object",
+      "properties": {
+        "laptopId": {
+          "type": "string"
+        },
+        "ratingsCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "averageScore": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "title": "RateLaptopResponse is the response message for the RateLaptop RPC"
+    },
+    "pcbookScreen": {
+      "type": "object",
+      "properties": {
+        "sizeInches": {
+          "type": "number",
+          "format": "float"
+        },
+        "resolution": {
+          "$ref": "#/definitions/ScreenResolution"
+        },
+        "panel": {
+          "$ref": "#/definitions/ScreenPanel"
+        },
+        "isMultiTouch": {
+          "type": "boolean"
+        }
+      },
+      "description": "Screen represents a screen of the PC."
+    },
+    "pcbookSearchLaptopResponse": {
+      "type": "object",
+      "properties": {
+        "laptop": {
+          "$ref": "#/definitions/pcbookLaptop"
+        }
+      },
+      "title": "SearchLaptopResponse represents the response message for the SearchLaptop RPC"
+    },
+    "pcbookStorage": {
+      "type": "object",
+      "properties": {
+        "driver": {
+          "$ref": "#/definitions/StorageDriver",
+          "description": "Driver is the type of the storage driver used in the pc."
+        },
+        "memory": {
+          "$ref": "#/definitions/pcbookMemory",
+          "description": "Memory is the total amount of storage capacity."
+        }
+      },
+      "description": "Storage is the type of the storage mechanism used in the pc."
+    },
+    "pcbookUploadImageRequest": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "$ref": "#/definitions/pcbookImageInfo"
+        },
+        "chunkData": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "title": "UploadImageRequest represents the request message for the UploadImage RPC"
+    },
+    "pcbookUploadImageResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "UploadImageResponse represents the response message for the UploadImage RPC"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
