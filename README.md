@@ -15,9 +15,15 @@ The web service has the following services:
 | UploadImage    | UploadImageRequest    | UploadImageResponse    |  Uploads and stores a laptop image                |
 | RateLaptop     | RateLaptopRequest     | RateLaptopResponse     |  Rates a laptop                                   |
 
+2. AuthService
+
+| RPC            | REQUEST TYPE          | RESPONSE TYPE          | DESCRIPTION                                             |
+| :---           | :---                  |  :---                  | :---                                                    |
+| Login          | LoginRequest          | LoginResponse          | Attempts to login a user using the provided credentials |
+
 ## Generate TLS Certificates
 
-To run the client and the server on `tls mode`, you need to generate the certificates.
+To run the client and the server on TLS mode [`enable-tls`], you need to generate the certificates.
 
 ```bash
   make gen-cert
