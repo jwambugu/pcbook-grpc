@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pcbook;
 
+import "google/api/annotations.proto";
+
 option go_package = "./pb";
 option java_package = "com.github.jwambugu.pcbook.pb";
 option java_multiple_files = true;
@@ -20,5 +22,10 @@ message LoginResponse {
 // AuthService provides methods for authenticating users.
 service AuthService {
   // Login authenticates a user with the given credentials.
-  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/login"
+      body: "*"
+    };
+  }
 }

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pcbook;
 
+import "google/api/annotations.proto";
+
 option go_package = "./pb";
 option java_package = "com.github.jwambugu.pcbook.pb";
 option java_multiple_files = true;
@@ -98,8 +100,27 @@ message RateLaptopResponse{
 
 // LaptopService is the interface for the Laptop service
 service LaptopService {
-  rpc CreateLaptop(CreateLaptopRequest) returns (CreateLaptopResponse) {}
-  rpc SearchLaptop(SearchLaptopRequest) returns (stream SearchLaptopResponse) {}
-  rpc UploadImage(stream UploadImageRequest) returns (UploadImageResponse) {}
-  rpc RateLaptop(stream RateLaptopRequest) returns (stream RateLaptopResponse) {}
+  rpc CreateLaptop(CreateLaptopRequest) returns (CreateLaptopResponse) {
+    option (google.api.http) = {
+      post: "/v1/laptop"
+      body: "*"
+    };
+  }
+  rpc SearchLaptop(SearchLaptopRequest) returns (stream SearchLaptopResponse) {
+    option (google.api.http) = {
+      get: "/v1/laptop/search"
+    };
+  }
+  rpc UploadImage(stream UploadImageRequest) returns (UploadImageResponse) {
+    option (google.api.http) = {
+      post: "/v1/laptop/upload-image"
+      body: "*"
+    };
+  }
+  rpc RateLaptop(stream RateLaptopRequest) returns (stream RateLaptopResponse) {
+    option (google.api.http) = {
+      post: "/v1/laptop/rate"
+      body: "*"
+    };
+  }
 }

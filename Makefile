@@ -1,5 +1,5 @@
 gen-protos:
-	 protoc -I protos/ protos/*.proto --go_out=protos --go-grpc_out=protos
+	 protoc -I protos/ protos/*.proto --go_out=protos --go-grpc_out=protos --grpc-gateway_out=protos --openapiv2_out=swagger
 
 clean-protos:
 	rm -f pb/*.go
